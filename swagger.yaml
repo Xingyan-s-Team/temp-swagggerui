@@ -1,18 +1,144 @@
 openapi: 3.0.0
 info:
-  title: Sample API
-  description: API description in Markdown.
+  title: SMS Login API with CAPTCHA
   version: 1.0.0
+  description: REST API for SMS-based login functionality with CAPTCHA verification
+servers:
+  - url: https://api.example.com/v1
+tags:
+  - name: auth
+    description: Authentication related endpoints
+components:
+  schemas:
+    ApiResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 200
+        msg:
+          type: string
+          example: success
+        data:
+          type: object
+    CaptchaResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 200
+        msg:
+          type: string
+          example: success
+        data:
+          type: object
+          properties:
+            captchaImage:
+              type: string
+              format: binary
+            captchaId:
+              type: string
+              example: "abc123"
 paths:
-  /users:
+  /auth/captcha:
     get:
-      summary: List all users
+      tags:
+        - auth
+      summary: Generate a CAPTCHA challenge
       responses:
         '200':
-          description: A JSON array of user names
+          description: CAPTCHA challenge generated successfully
           content:
             application/json:
               schema:
-                type: array
-                items:
+                $ref: '#/components/schemas/CaptchaResponse'
+
+    post:
+      tags:
+        - auth
+      summary: Verify the CAPTCHA response
+      requestBody:
+        description: CAPTCHA response from the user
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                captchaId:
                   type: string
+                  example: "abc123"
+                captchaResponse:
+                  type: string
+                  example: "xyz456"
+      responses:
+        '200':
+          description: CAPTCHA verified successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+
+  /auth/sendVerificationCode:
+    post:
+      tags:
+        - auth
+      summary: Send a verification code to the user's phone
+      requestBody:
+        description: Phone number and CAPTCHA response
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                phoneNumber:
+                  type: string
+                  example: "+1234567890"
+                captchaId:
+                  type: string
+                  example: "abc123"
+                captchaResponse:
+                  type: string
+                  example: "xyz456"
+      responses:
+        '200':
+          description: Verification code sent successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+
+  /auth/verifyCode:
+    post:
+      tags:
+        - auth
+      summary: Verify the entered code and login, returning a token
+      requestBody:
+        description: Code to verify
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                phoneNumber:
+                  type: string
+                  example: "+1234567890"
+                code:
+                  type: string
+                  example: "123456"
+      responses:
+        '200':
+          description: Code verified and token returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      token:
+                        type: string
+                        example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
