@@ -1,13 +1,21 @@
 openapi: 3.0.0
 info:
-  title: SMS Login API with CAPTCHA
+  title: SMS Login API with CAPTCHA and Course Management
   version: 1.0.0
-  description: REST API for SMS-based login functionality with CAPTCHA verification
+  description: REST API for SMS-based login functionality with CAPTCHA verification and course management
 servers:
   - url: https://api.example.com/v1
 tags:
   - name: auth
     description: Authentication related endpoints
+  - name: user
+    description: User information endpoints
+  - name: courses
+    description: Course management endpoints
+  - name: themes
+    description: Theme management endpoints
+  - name: portfolios
+    description: Portfolio management endpoints
 components:
   schemas:
     ApiResponse:
@@ -39,6 +47,118 @@ components:
             captchaId:
               type: string
               example: "abc123"
+    UserResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "user123"
+        name:
+          type: string
+          example: "John Doe"
+        points:
+          type: integer
+          example: 100
+        avatar:
+          type: string
+          format: uri
+          example: "https://example.com/avatar.jpg"
+    Course:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "course123"
+        name:
+          type: string
+          example: "Introduction to Programming"
+        description:
+          type: string
+          example: "A beginner course on programming concepts."
+        purchaseStatus:
+          type: string
+          enum: [ not_purchased, purchased, free]
+          example: "not_purchased"
+        progress:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 1
+          example: 0.5
+    Chapter: 
+      type: object 
+      properties: 
+        id: 
+          type: string 
+          example: "chapter123" 
+        title: 
+          type: string 
+          example: "Chapter 1: Basics" 
+        description: 
+          type: string 
+          example: "An introduction to the basics." 
+    Unit: 
+      type: object 
+      properties: 
+        id: 
+          type: string 
+          example: "unit123" 
+        title: 
+          type: string 
+          example: "Unit 1: Introduction" 
+        content: 
+          type: string 
+          example: "The content of the unit goes here."
+    PageResponse:
+      type: object
+      properties:
+        total:
+          type: integer
+          example: 100
+        totalPages:
+          type: integer
+          example: 10
+        size:
+          type: integer
+          example: 10
+        page:
+          type: integer
+          example: 1
+        items:
+          type: array
+          items:
+            oneOf:
+              - $ref: '#/components/schemas/UserResponse'
+              - $ref: '#/components/schemas/Course'
+    Theme:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "theme123"
+        name:
+          type: string
+          example: "Technology"
+        description:
+          type: string
+          example: "A theme focusing on technology investments."
+    Portfolio:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "portfolio123"
+        name:
+          type: string
+          example: "My Investment Portfolio"
+        themeId:
+          type: string
+          example: "theme123"
+        description:
+          type: string
+          example: "Portfolio for technology investments."
+
+
 paths:
   /auth/captcha:
     get:
@@ -142,3 +262,399 @@ paths:
                       token:
                         type: string
                         example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+
+  /user/me:
+    get:
+      tags:
+        - user
+      summary: Get authenticated user information
+      parameters:
+        - name: Authorization
+          in: header
+          required: true
+          description: Bearer token
+          schema:
+            type: string
+            example: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+      responses:
+        '200':
+          description: User information retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+
+  /users:
+    get:
+      tags:
+        - user
+      summary: Get list of users
+      parameters:
+        - name: page
+          in: query
+          description: Page number (1-100000)
+          required: false
+          schema:
+            type: integer
+            default: 1
+        - name: size
+          in: query
+          description: Number of items per page (1-100)
+          required: false
+          schema:
+            type: integer
+            default: 20
+        - name: Authorization
+          in: header
+          required: true
+          description: Bearer token
+          schema:
+            type: string
+            example: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+      responses:
+        '200':
+          description: User list retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PageResponse'
+
+  /users/{id}:
+    get:
+      tags:
+        - user
+      summary: Get user by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: User ID
+          schema:
+            type: string
+            example: "user123"
+        - name: Authorization
+          in: header
+          required: true
+          description: Bearer token
+          schema:
+            type: string
+            example: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+      responses:
+        '200':
+          description: User information retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+
+  /courses:
+    get:
+      tags:
+        - courses
+      summary: Get the list of courses
+      parameters:
+        - name: page
+          in: query
+          description: Page number (1-100000)
+          required: false
+          schema:
+            type: integer
+            default: 1
+        - name: size
+          in: query
+          description: Number of items per page (1-100)
+          required: false
+          schema:
+            type: integer
+            default: 20
+        - name: Authorization
+          in: header
+          required: true
+          description: Bearer token
+          schema:
+            type: string
+            example: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+      responses:
+        '200':
+          description: Course list retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PageResponse'
+
+  /courses/{id}:
+    get:
+      tags:
+        - courses
+      summary: Get course by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Course ID
+          schema:
+            type: string
+            example: "course123"
+        - name: Authorization
+          in: header
+          required: true
+          description: Bearer token
+          schema:
+            type: string
+            example: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+      responses:
+        '200':
+          description: Course information retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Course'
+  /courses/{id}/chapters:
+    get:
+      tags:
+        - chapters
+      summary: Get chapters of a course
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Course ID
+          schema:
+            type: string
+            example: "course123"
+        - name: Authorization
+          in: header
+          required: true
+          description: Bearer token
+          schema:
+            type: string
+            example: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+      responses:
+        '200':
+          description: Chapters list retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Chapter'
+  /chapters/{id}:
+    get:
+      tags:
+        - chapters
+      summary: Get chapter by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Chapter ID
+          schema:
+            type: string
+            example: "chapter123"
+        - name: Authorization
+          in: header
+          required: true
+          description: Bearer token
+          schema:
+            type: string
+            example: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+      responses:
+        '200':
+          description: Chapter information retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Chapter'
+  /chapters/{id}/units:
+    get:
+      tags:
+        - units
+      summary: Get units of a chapter
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Chapter ID
+          schema:
+            type: string
+            example: "chapter123"
+        - name: Authorization
+          in: header
+          required: true
+          description: Bearer token
+          schema:
+            type: string
+            example: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+      responses:
+        '200':
+          description: Units list retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Unit'
+  /units/{id}:
+    get:
+      tags:
+        - units
+      summary: Get unit by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Unit ID
+          schema:
+            type: string
+            example: "unit123"
+        - name: Authorization
+          in: header
+          required: true
+          description: Bearer token
+          schema:
+            type: string
+            example: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+      responses:
+        '200':
+          description: Unit information retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Unit'
+
+
+  /themes:
+    get:
+      tags:
+        - themes
+      summary: Get the list of themes
+      responses:
+        '200':
+          description: Theme list retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Theme'
+
+  /themes/{id}:
+    get:
+      tags:
+        - themes
+      summary: Get theme by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Theme ID
+          schema:
+            type: string
+            example: "theme123"
+      responses:
+        '200':
+          description: Theme retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Theme'
+
+  /portfolios:
+    get:
+      tags:
+        - portfolios
+      summary: Get the list of portfolios
+      responses:
+        '200':
+          description: Portfolio list retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Portfolio'
+
+    post:
+      tags:
+        - portfolios
+      summary: Create a new portfolio
+      requestBody:
+        description: Portfolio details
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Portfolio'
+      responses:
+        '200':
+          description: Portfolio created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+
+  /portfolios/{id}:
+    put:
+      tags:
+        - portfolios
+      summary: Update a portfolio by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Portfolio ID
+          schema:
+            type: string
+            example: "portfolio123"
+      requestBody:
+        description: Portfolio details to update
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Portfolio'
+      responses:
+        '200':
+          description: Portfolio updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+
+  /portfolios/mine:
+    get:
+      tags:
+        - portfolios
+      summary: Get portfolios owned by the authenticated user
+      responses:
+        '200':
+          description: User's portfolios retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Portfolio'
+
+  /themes/{id}/portfolios:
+    get:
+      tags:
+        - themes
+      summary: Get portfolios by theme ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Theme ID
+          schema:
+            type: string
+            example: "theme123"
+      responses:
+        '200':
+          description: Portfolios under the specified theme retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Portfolio'
