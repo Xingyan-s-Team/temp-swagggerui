@@ -85,18 +85,6 @@ components:
           minimum: 0
           maximum: 1
           example: 0.5
-    Chapter: 
-      type: object 
-      properties: 
-        id: 
-          type: string 
-          example: "chapter123" 
-        title: 
-          type: string 
-          example: "Chapter 1: Basics" 
-        description: 
-          type: string 
-          example: "An introduction to the basics." 
     Unit: 
       type: object 
       properties: 
@@ -105,10 +93,22 @@ components:
           example: "unit123" 
         title: 
           type: string 
-          example: "Unit 1: Introduction" 
+          example: "Unit 1: Basics" 
+        description: 
+          type: string 
+          example: "An introduction to the basics." 
+    Task: 
+      type: object 
+      properties: 
+        id: 
+          type: string 
+          example: "task123" 
+        title: 
+          type: string 
+          example: "Task 1: Introduction" 
         content: 
           type: string 
-          example: "The content of the unit goes here."
+          example: "The content of the task goes here."
     PageResponse:
       type: object
       properties:
@@ -409,11 +409,11 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Course'
-  /courses/{id}/chapters:
+  /courses/{id}/units:
     get:
       tags:
-        - chapters
-      summary: Get chapters of a course
+        - units
+      summary: Get units of a course
       parameters:
         - name: id
           in: path
@@ -422,62 +422,6 @@ paths:
           schema:
             type: string
             example: "course123"
-        - name: Authorization
-          in: header
-          required: true
-          description: Bearer token
-          schema:
-            type: string
-            example: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-      responses:
-        '200':
-          description: Chapters list retrieved successfully
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Chapter'
-  /chapters/{id}:
-    get:
-      tags:
-        - chapters
-      summary: Get chapter by ID
-      parameters:
-        - name: id
-          in: path
-          required: true
-          description: Chapter ID
-          schema:
-            type: string
-            example: "chapter123"
-        - name: Authorization
-          in: header
-          required: true
-          description: Bearer token
-          schema:
-            type: string
-            example: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-      responses:
-        '200':
-          description: Chapter information retrieved successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Chapter'
-  /chapters/{id}/units:
-    get:
-      tags:
-        - units
-      summary: Get units of a chapter
-      parameters:
-        - name: id
-          in: path
-          required: true
-          description: Chapter ID
-          schema:
-            type: string
-            example: "chapter123"
         - name: Authorization
           in: header
           required: true
@@ -521,6 +465,62 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Unit'
+  /units/{id}/tasks:
+    get:
+      tags:
+        - tasks
+      summary: Get tasks of a unit
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Unit ID
+          schema:
+            type: string
+            example: "unit123"
+        - name: Authorization
+          in: header
+          required: true
+          description: Bearer token
+          schema:
+            type: string
+            example: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+      responses:
+        '200':
+          description: Tasks list retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Task'
+  /tasks/{id}:
+    get:
+      tags:
+        - tasks
+      summary: Get task by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Task ID
+          schema:
+            type: string
+            example: "task123"
+        - name: Authorization
+          in: header
+          required: true
+          description: Bearer token
+          schema:
+            type: string
+            example: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+      responses:
+        '200':
+          description: Task information retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
 
 
   /themes:
